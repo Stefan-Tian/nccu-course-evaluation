@@ -109,7 +109,7 @@ export class Head extends Component {
           </Text>
           <Text sm clickable>
             {/* 登入 */}
-            <PureUrl href="http://0689f14c.ngrok.io/login?next=%2F%3Ffbclid%3DIwAR1GU3WszWj1XfdtW-wb6Xe6og--S_drGqiKkOovOHO0RVFt6jeXwGaX8H4">
+            <PureUrl href="https://0689f14c.ngrok.io/login?next=%2F%3Ffbclid%3DIwAR1GU3WszWj1XfdtW-wb6Xe6og--S_drGqiKkOovOHO0RVFt6jeXwGaX8H4">
               登入
             </PureUrl>
           </Text>
