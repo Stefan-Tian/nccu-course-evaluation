@@ -25,7 +25,7 @@ class App extends Component {
   componentDidMount() {
     window.addEventListener('scroll', this.handleScroll);
     axios
-      .get('http://0689f14c.ngrok.io/current_user')
+      .get('http://0689f14c.ngrok.io/user_email')
       .then(res => console.log(res));
   }
 
