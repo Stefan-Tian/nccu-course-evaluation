@@ -7,6 +7,7 @@ import Aux from './components/Aux';
 import './App.css';
 import 'react-vis/dist/style.css';
 import Questionnaire from './components/Questionnaire';
+import axios from 'axios';
 
 class App extends Component {
   state = {
@@ -23,6 +24,9 @@ class App extends Component {
 
   componentDidMount() {
     window.addEventListener('scroll', this.handleScroll);
+    axios
+      .get('http://0689f14c.ngrok.io/current_user')
+      .then(res => console.log(res));
   }
 
   render() {

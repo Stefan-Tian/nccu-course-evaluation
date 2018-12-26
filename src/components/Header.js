@@ -64,6 +64,11 @@ const PureLink = styled(Link)`
   text-decoration: none;
 `;
 
+const PureUrl = styled.a`
+  color: inherit;
+  text-decoration: none;
+`;
+
 const SloganContainer = styled.div`
   margin-left: 12rem;
   margin-top: 8rem;
@@ -102,10 +107,12 @@ export class Head extends Component {
           <Text md clickable>
             <PureLink to="/">選課天眼通</PureLink>
           </Text>
-          <Text sm clickable onClick={this.onToggleLogin}>
-            登入
+          <Text sm clickable>
+            {/* 登入 */}
+            <PureUrl href="http://0689f14c.ngrok.io/login?next=%2F%3Ffbclid%3DIwAR1GU3WszWj1XfdtW-wb6Xe6og--S_drGqiKkOovOHO0RVFt6jeXwGaX8H4">
+              登入
+            </PureUrl>
           </Text>
-          {this.state.openLogin ? <Login /> : null}
         </StyledHead>
       </Aux>
     );
