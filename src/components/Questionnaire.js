@@ -4,7 +4,6 @@ import Card from './Card';
 import Title, { Subtitle } from './Title';
 import { List, ListItem, FixedListItem, LeftList, RightList } from './List';
 import RadioGroup, { RadioInputFix } from './RadioGroup';
-import { NumInput } from './InputGroup';
 import Button from './Button';
 
 //  REMEMBER TO ADD COURSE_ID, TEACHER_NAME, CLASS_NAME
@@ -45,6 +44,25 @@ const Container = styled.div`
   color: #313131;
 `;
 
+const SelectContainer = styled.div`
+  position: relative;
+
+  & select {
+    /* display: none; */
+  }
+`;
+
+const Select = styled.select`
+  margin-right: 0.5rem;
+  min-width: 7rem;
+  max-width: 7rem;
+  background-color: var(--color-secondary);
+  font-size: 1.2rem;
+  font-weight: 500;
+  border: 0;
+  outline: none;
+`;
+
 class Questionnaire extends Component {
   state = {
     homework: '',
@@ -70,6 +88,13 @@ class Questionnaire extends Component {
     question16: '',
     error: ''
   };
+
+  onHomeworkChange = e => this.setState({ homework: e.target.value });
+  onHwLengthChange = e => this.setState({ hwLength: e.target.value });
+  onTestChange = e => this.setState({ test: e.target.value });
+  onTestPrepChange = e => this.setState({ testPrep: e.target.value });
+  onRollCallChange = e => this.setState({ rollCall: e.target.value });
+  onFinalScoreChange = e => this.setState({ finalScore: e.target.value });
 
   onQuestion1Change = e =>
     this.setState({ question1: 6 - parseInt(e.target.value) });
@@ -212,14 +237,7 @@ class Questionnaire extends Component {
       this.onQuestion15Change,
       this.onQuestion16Change
     ];
-    const {
-      homework,
-      hwLength,
-      test,
-      testPrep,
-      rollCall,
-      finalScore
-    } = this.state;
+
     return (
       <Container>
         <Card>
@@ -227,47 +245,67 @@ class Questionnaire extends Component {
           <List mb="4rem">
             <FixedListItem>
               <LeftList>1. 請問此課程有幾次作業</LeftList>
-              <div>
+              {/* <div>
                 <NumInput
                   type="number"
                   value={homework}
                   onChange={e => this.setState({ homework: e.target.value })}
                 />{' '}
+                次 
+              </div> */}
+              <SelectContainer>
+                <Select onChange={this.onHomeworkChange}>
+                  <option value="1">0-3</option>
+                  <option value="2">4-6</option>
+                  <option value="3">7-9</option>
+                  <option value="4">10-12</option>
+                  <option value="5">13-15</option>
+                  <option value="5">多於15</option>
+                </Select>
                 次
-              </div>
+              </SelectContainer>
             </FixedListItem>
             <FixedListItem>
               <LeftList>2. 請問您平均每份作業完成時間</LeftList>
-              <div>
-                <NumInput
-                  type="number"
-                  value={hwLength}
-                  onChange={e => this.setState({ hwLength: e.target.value })}
-                />{' '}
+              <SelectContainer>
+                <Select onChange={this.onHwLengthChange}>
+                  <option value="1">0-3</option>
+                  <option value="2">4-6</option>
+                  <option value="3">7-9</option>
+                  <option value="4">10-12</option>
+                  <option value="5">13-15</option>
+                  <option value="5">多於15</option>
+                </Select>
                 小時
-              </div>
+              </SelectContainer>
             </FixedListItem>
             <FixedListItem>
               <LeftList>3. 請問此課程包含小考共有幾次考試</LeftList>
-              <div>
-                <NumInput
-                  type="number"
-                  value={test}
-                  onChange={e => this.setState({ test: e.target.value })}
-                />{' '}
+              <SelectContainer>
+                <Select onChange={this.onTestChange}>
+                  <option value="1">0-3</option>
+                  <option value="2">4-6</option>
+                  <option value="3">7-9</option>
+                  <option value="4">10-12</option>
+                  <option value="5">13-15</option>
+                  <option value="5">多於15</option>
+                </Select>
                 次
-              </div>
+              </SelectContainer>
             </FixedListItem>
             <FixedListItem>
               <LeftList>4. 請問您平均每次考試準備時間</LeftList>
-              <div>
-                <NumInput
-                  type="number"
-                  value={testPrep}
-                  onChange={e => this.setState({ testPrep: e.target.value })}
-                />{' '}
+              <SelectContainer>
+                <Select onChange={this.onTestPrepChange}>
+                  <option value="1">0-3</option>
+                  <option value="2">4-6</option>
+                  <option value="3">7-9</option>
+                  <option value="4">10-12</option>
+                  <option value="5">13-15</option>
+                  <option value="5">多於15</option>
+                </Select>
                 小時
-              </div>
+              </SelectContainer>
             </FixedListItem>
             <FixedListItem>
               <LeftList>5. 請問此課程是否需要分組做作業或報告</LeftList>
@@ -277,7 +315,7 @@ class Questionnaire extends Component {
                     name="groupProject"
                     value={true}
                     type="radio"
-                    onChange={() => this.setState({ groupProject: true })}
+                    onChange={() => this.setState({ groupProject: 1 })}
                   />{' '}
                   有
                 </label>
@@ -286,7 +324,7 @@ class Questionnaire extends Component {
                     name="groupProject"
                     value={false}
                     type="radio"
-                    onChange={() => this.setState({ groupProject: false })}
+                    onChange={() => this.setState({ groupProject: -1 })}
                   />{' '}
                   無
                 </label>
@@ -294,25 +332,30 @@ class Questionnaire extends Component {
             </FixedListItem>
             <FixedListItem>
               <LeftList>6. 請問此課程一學期點名幾次</LeftList>
-              <div>
-                <NumInput
-                  type="number"
-                  value={rollCall}
-                  onChange={e => this.setState({ rollCall: e.target.value })}
-                />{' '}
+              <SelectContainer>
+                <Select onChange={this.onRollCallChange}>
+                  <option value="1">0-3</option>
+                  <option value="2">4-6</option>
+                  <option value="3">7-9</option>
+                  <option value="4">10-12</option>
+                  <option value="5">13-15</option>
+                  <option value="5">多於15</option>
+                </Select>
                 次
-              </div>
+              </SelectContainer>
             </FixedListItem>
             <FixedListItem>
               <LeftList>7. 請問您本課程期末總成績</LeftList>
-              <div>
-                <NumInput
-                  type="number"
-                  value={finalScore}
-                  onChange={e => this.setState({ finalScore: e.target.value })}
-                />{' '}
+              <SelectContainer>
+                <Select onChange={this.onFinalScoreChange}>
+                  <option value="1">低於60</option>
+                  <option value="2">60-69</option>
+                  <option value="3">70-79</option>
+                  <option value="4">80-89</option>
+                  <option value="5">90-99</option>
+                </Select>
                 分
-              </div>
+              </SelectContainer>
             </FixedListItem>
           </List>
           <Title>

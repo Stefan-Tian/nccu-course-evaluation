@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import axios from 'axios';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import CourseCards from './components/CourseCards';
 import CourseDetails from './components/CourseDetails';
@@ -7,7 +8,7 @@ import Aux from './components/Aux';
 import './App.css';
 import 'react-vis/dist/style.css';
 import Questionnaire from './components/Questionnaire';
-import axios from 'axios';
+import CreateCourse from './components/CreateCourse';
 
 class App extends Component {
   state = {
@@ -25,7 +26,7 @@ class App extends Component {
   componentDidMount() {
     window.addEventListener('scroll', this.handleScroll);
     axios
-      .get('https://0689f14c.ngrok.io/user_email')
+      .get('https://0689f14c.ngrok.io/user_email/')
       .then(res => console.log(res));
   }
 
@@ -38,6 +39,7 @@ class App extends Component {
             <Route exact path="/" component={CourseCards} />
             <Route path="/courses/:id" component={CourseDetails} />
             <Route exact path="/questionnaire/:id" component={Questionnaire} />
+            <Route path="/create-course" component={CreateCourse} />
           </Switch>
         </Aux>
       </BrowserRouter>
