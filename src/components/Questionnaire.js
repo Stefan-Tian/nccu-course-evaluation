@@ -1,10 +1,15 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
+import axios from 'axios';
 import Card from './Card';
+import Aux from './Aux';
 import Title, { Subtitle } from './Title';
 import { List, ListItem, FixedListItem, LeftList, RightList } from './List';
 import RadioGroup, { RadioInputFix } from './RadioGroup';
 import Button from './Button';
+import { CloseModal, ModalBack } from './Modal';
+import PasswordConfirmation from './PasswordConfirmation';
+import { AccountInfoConsumer } from './AccoutInfo.context';
 
 //  REMEMBER TO ADD COURSE_ID, TEACHER_NAME, CLASS_NAME
 // IN THE DATA AND SEND THEM TO BACKEND
@@ -65,6 +70,8 @@ const Select = styled.select`
 
 class Questionnaire extends Component {
   state = {
+    password: '',
+    enterPassword: '',
     homework: '',
     hwLength: '',
     test: '',
@@ -88,6 +95,9 @@ class Questionnaire extends Component {
     question16: '',
     error: ''
   };
+
+  onPasswordChange = e => this.setState({ password: e.target.value });
+  onEnterPassword = () => this.setState({ enterPassword: true });
 
   onHomeworkChange = e => this.setState({ homework: e.target.value });
   onHwLengthChange = e => this.setState({ hwLength: e.target.value });
@@ -129,7 +139,7 @@ class Questionnaire extends Component {
   onQuestion16Change = e =>
     this.setState({ question16: parseInt(e.target.value) });
 
-  handleSubmit = () => {
+  handleSubmit = async (account, password) => {
     let {
       homework,
       hwLength,
@@ -198,7 +208,9 @@ class Questionnaire extends Component {
     const effectiveness = question9 + question10 + question11 + question12;
     const mental = question13 + question14 + question15 + question16;
 
-    const data = JSON.stringify({
+    const result = await axios.post('http://localhost:9999/addNameClassValue', {
+      account,
+      password,
       id,
       className,
       teacherName,
@@ -215,7 +227,14 @@ class Questionnaire extends Component {
       mental
     });
 
-    console.log(data);
+    console(result);
+  };
+
+  onPasswordConfirm = () => {
+    const { currentAccount } = this.props.context;
+    const { password } = this.state;
+    this.handleSubmit(currentAccount, password);
+    this.setState({ enterPassword: false });
   };
 
   render() {
@@ -239,13 +258,14 @@ class Questionnaire extends Component {
     ];
 
     return (
-      <Container>
-        <Card>
-          <Title>客觀問題</Title>
-          <List mb="4rem">
-            <FixedListItem>
-              <LeftList>1. 請問此課程有幾次作業</LeftList>
-              {/* <div>
+      <Aux>
+        <Container>
+          <Card>
+            <Title>客觀問題</Title>
+            <List mb="4rem">
+              <FixedListItem>
+                <LeftList>1. 請問此課程有幾次作業</LeftList>
+                {/* <div>
                 <NumInput
                   type="number"
                   value={homework}
@@ -253,141 +273,159 @@ class Questionnaire extends Component {
                 />{' '}
                 次 
               </div> */}
-              <SelectContainer>
-                <Select onChange={this.onHomeworkChange}>
-                  <option value="1">0-3</option>
-                  <option value="2">4-6</option>
-                  <option value="3">7-9</option>
-                  <option value="4">10-12</option>
-                  <option value="5">13-15</option>
-                  <option value="5">多於15</option>
-                </Select>
-                次
-              </SelectContainer>
-            </FixedListItem>
-            <FixedListItem>
-              <LeftList>2. 請問您平均每份作業完成時間</LeftList>
-              <SelectContainer>
-                <Select onChange={this.onHwLengthChange}>
-                  <option value="1">0-3</option>
-                  <option value="2">4-6</option>
-                  <option value="3">7-9</option>
-                  <option value="4">10-12</option>
-                  <option value="5">13-15</option>
-                  <option value="5">多於15</option>
-                </Select>
-                小時
-              </SelectContainer>
-            </FixedListItem>
-            <FixedListItem>
-              <LeftList>3. 請問此課程包含小考共有幾次考試</LeftList>
-              <SelectContainer>
-                <Select onChange={this.onTestChange}>
-                  <option value="1">0-3</option>
-                  <option value="2">4-6</option>
-                  <option value="3">7-9</option>
-                  <option value="4">10-12</option>
-                  <option value="5">13-15</option>
-                  <option value="5">多於15</option>
-                </Select>
-                次
-              </SelectContainer>
-            </FixedListItem>
-            <FixedListItem>
-              <LeftList>4. 請問您平均每次考試準備時間</LeftList>
-              <SelectContainer>
-                <Select onChange={this.onTestPrepChange}>
-                  <option value="1">0-3</option>
-                  <option value="2">4-6</option>
-                  <option value="3">7-9</option>
-                  <option value="4">10-12</option>
-                  <option value="5">13-15</option>
-                  <option value="5">多於15</option>
-                </Select>
-                小時
-              </SelectContainer>
-            </FixedListItem>
-            <FixedListItem>
-              <LeftList>5. 請問此課程是否需要分組做作業或報告</LeftList>
-              <RightList>
-                <label>
-                  <RadioInputFix
-                    name="groupProject"
-                    value={true}
-                    type="radio"
-                    onChange={() => this.setState({ groupProject: 1 })}
-                  />{' '}
-                  有
-                </label>
-                <label>
-                  <RadioInputFix
-                    name="groupProject"
-                    value={false}
-                    type="radio"
-                    onChange={() => this.setState({ groupProject: -1 })}
-                  />{' '}
-                  無
-                </label>
-              </RightList>
-            </FixedListItem>
-            <FixedListItem>
-              <LeftList>6. 請問此課程一學期點名幾次</LeftList>
-              <SelectContainer>
-                <Select onChange={this.onRollCallChange}>
-                  <option value="1">0-3</option>
-                  <option value="2">4-6</option>
-                  <option value="3">7-9</option>
-                  <option value="4">10-12</option>
-                  <option value="5">13-15</option>
-                  <option value="5">多於15</option>
-                </Select>
-                次
-              </SelectContainer>
-            </FixedListItem>
-            <FixedListItem>
-              <LeftList>7. 請問您本課程期末總成績</LeftList>
-              <SelectContainer>
-                <Select onChange={this.onFinalScoreChange}>
-                  <option value="1">低於60</option>
-                  <option value="2">60-69</option>
-                  <option value="3">70-79</option>
-                  <option value="4">80-89</option>
-                  <option value="5">90-99</option>
-                </Select>
-                分
-              </SelectContainer>
-            </FixedListItem>
-          </List>
-          <Title>
-            <div>
-              主觀問題 - <Subtitle>1分非常不同意; 5分非常同意</Subtitle>
-            </div>
-            <Scale>
-              {Array.apply(null, { length: 5 })
-                .map(Number.call, Number)
-                .map(idx => (
-                  <ScaleItem key={idx + 'scaleItem'}>{idx + 1}</ScaleItem>
-                ))}
-            </Scale>
-          </Title>
-          <List>
-            {subjectiveQuestions.map((question, idx) => (
-              <ListItem key={question}>
-                <div>
-                  {idx + 1}. {question}
-                </div>
-                <RadioGroup
-                  num={idx + 1}
-                  onRadioChange={questionHandlers[idx]}
-                />
-              </ListItem>
-            ))}
-          </List>
-          <Button onClick={this.handleSubmit}>提交表單</Button>
-        </Card>
-      </Container>
+                <SelectContainer>
+                  <Select onChange={this.onHomeworkChange}>
+                    <option value="1">0-3</option>
+                    <option value="2">4-6</option>
+                    <option value="3">7-9</option>
+                    <option value="4">10-12</option>
+                    <option value="5">13-15</option>
+                    <option value="5">多於15</option>
+                  </Select>
+                  次
+                </SelectContainer>
+              </FixedListItem>
+              <FixedListItem>
+                <LeftList>2. 請問您平均每份作業完成時間</LeftList>
+                <SelectContainer>
+                  <Select onChange={this.onHwLengthChange}>
+                    <option value="1">0-3</option>
+                    <option value="2">4-6</option>
+                    <option value="3">7-9</option>
+                    <option value="4">10-12</option>
+                    <option value="5">13-15</option>
+                    <option value="5">多於15</option>
+                  </Select>
+                  小時
+                </SelectContainer>
+              </FixedListItem>
+              <FixedListItem>
+                <LeftList>3. 請問此課程包含小考共有幾次考試</LeftList>
+                <SelectContainer>
+                  <Select onChange={this.onTestChange}>
+                    <option value="1">0-3</option>
+                    <option value="2">4-6</option>
+                    <option value="3">7-9</option>
+                    <option value="4">10-12</option>
+                    <option value="5">13-15</option>
+                    <option value="5">多於15</option>
+                  </Select>
+                  次
+                </SelectContainer>
+              </FixedListItem>
+              <FixedListItem>
+                <LeftList>4. 請問您平均每次考試準備時間</LeftList>
+                <SelectContainer>
+                  <Select onChange={this.onTestPrepChange}>
+                    <option value="1">0-3</option>
+                    <option value="2">4-6</option>
+                    <option value="3">7-9</option>
+                    <option value="4">10-12</option>
+                    <option value="5">13-15</option>
+                    <option value="5">多於15</option>
+                  </Select>
+                  小時
+                </SelectContainer>
+              </FixedListItem>
+              <FixedListItem>
+                <LeftList>5. 請問此課程是否需要分組做作業或報告</LeftList>
+                <RightList>
+                  <label>
+                    <RadioInputFix
+                      name="groupProject"
+                      value={true}
+                      type="radio"
+                      onChange={() => this.setState({ groupProject: 1 })}
+                    />{' '}
+                    有
+                  </label>
+                  <label>
+                    <RadioInputFix
+                      name="groupProject"
+                      value={false}
+                      type="radio"
+                      onChange={() => this.setState({ groupProject: -1 })}
+                    />{' '}
+                    無
+                  </label>
+                </RightList>
+              </FixedListItem>
+              <FixedListItem>
+                <LeftList>6. 請問此課程一學期點名幾次</LeftList>
+                <SelectContainer>
+                  <Select onChange={this.onRollCallChange}>
+                    <option value="1">0-3</option>
+                    <option value="2">4-6</option>
+                    <option value="3">7-9</option>
+                    <option value="4">10-12</option>
+                    <option value="5">13-15</option>
+                    <option value="5">多於15</option>
+                  </Select>
+                  次
+                </SelectContainer>
+              </FixedListItem>
+              <FixedListItem>
+                <LeftList>7. 請問您本課程期末總成績</LeftList>
+                <SelectContainer>
+                  <Select onChange={this.onFinalScoreChange}>
+                    <option value="1">低於60</option>
+                    <option value="2">60-69</option>
+                    <option value="3">70-79</option>
+                    <option value="4">80-89</option>
+                    <option value="5">90-99</option>
+                  </Select>
+                  分
+                </SelectContainer>
+              </FixedListItem>
+            </List>
+            <Title>
+              <div>
+                主觀問題 - <Subtitle>1分非常不同意; 5分非常同意</Subtitle>
+              </div>
+              <Scale>
+                {Array.apply(null, { length: 5 })
+                  .map(Number.call, Number)
+                  .map(idx => (
+                    <ScaleItem key={idx + 'scaleItem'}>{idx + 1}</ScaleItem>
+                  ))}
+              </Scale>
+            </Title>
+            <List>
+              {subjectiveQuestions.map((question, idx) => (
+                <ListItem key={question}>
+                  <div>
+                    {idx + 1}. {question}
+                  </div>
+                  <RadioGroup
+                    num={idx + 1}
+                    onRadioChange={questionHandlers[idx]}
+                  />
+                </ListItem>
+              ))}
+            </List>
+            <Button onClick={this.onEnterPassword}>提交表單</Button>
+          </Card>
+        </Container>
+        {this.state.enterPassword ? (
+          <ModalBack>
+            <CloseModal onClick={() => this.setState({ enterPassword: false })}>
+              x
+            </CloseModal>
+            <PasswordConfirmation
+              password={this.state.password}
+              onPasswordChange={this.onPasswordChange}
+              onPasswordConfirm={this.onPasswordConfirm}
+            />
+          </ModalBack>
+        ) : null}
+      </Aux>
     );
   }
 }
 
-export default Questionnaire;
+const MapQuestionnaire = props => (
+  <AccountInfoConsumer>
+    {context => <Questionnaire context={context} {...props} />}
+  </AccountInfoConsumer>
+);
+export default MapQuestionnaire;

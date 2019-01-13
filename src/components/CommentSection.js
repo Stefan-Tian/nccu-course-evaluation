@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import styled, { css } from 'styled-components';
 import Text from './Text';
 
@@ -108,41 +108,39 @@ const comments = [
   '微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分'
 ];
 
-class CommentSection extends Component {
-  state = {
-    review: ''
-  };
-
-  render() {
-    const { review } = this.state;
-    return (
-      <CommentContainer>
-        <Flex>
-          <NewComment
-            value={review}
-            onChange={e => this.setState({ review: e.target.value })}
-          />
-          <Review>留言</Review>
-        </Flex>
-        <Comment>
-          <Text sm>期中考寫到手酸</Text>
-          <VoteContainer>
-            <Vote down>噓</Vote>
-            <Vote up>讚</Vote>
-          </VoteContainer>
-        </Comment>
-        {comments.map(comment => (
-          <Comment>
-            <Text sm>{comment}</Text>
-            <VoteContainer>
-              <Vote down>噓</Vote>
-              <Vote up>讚</Vote>
-            </VoteContainer>
-          </Comment>
-        ))}
-      </CommentContainer>
-    );
-  }
-}
+const CommentSection = ({
+  comment,
+  onCommentChange,
+  onUpvote,
+  onDownvote,
+  onSubmitComment
+}) => (
+  <CommentContainer>
+    <Flex>
+      <NewComment value={comment} onChange={onCommentChange} />
+      <Review onClick={onSubmitComment}>留言</Review>
+    </Flex>
+    <Comment>
+      <Text sm>期中考寫到手酸</Text>
+      <VoteContainer>
+        <Vote down onClick={onDownvote}>
+          噓
+        </Vote>
+        <Vote up onClick={onUpvote}>
+          讚
+        </Vote>
+      </VoteContainer>
+    </Comment>
+    {comments.map(comment => (
+      <Comment>
+        <Text sm>{comment}</Text>
+        <VoteContainer>
+          <Vote down>噓</Vote>
+          <Vote up>讚</Vote>
+        </VoteContainer>
+      </Comment>
+    ))}
+  </CommentContainer>
+);
 
 export default CommentSection;

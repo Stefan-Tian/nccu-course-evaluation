@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
+import axios from 'axios';
 import Container from './Container';
 import CourseCard from './CourseCard';
 import Aux from './Aux';
 import Header from './Header';
 import FilterBar from './FilterBar';
+import { CourseDetailsConsumer } from './CourseDetails.context';
 
 const Flex = styled.div`
   flex-wrap: wrap;
@@ -17,136 +19,136 @@ const Flex = styled.div`
   }
 `;
 
-const courses = [
-  {
-    courseId: '0001',
-    course: '微積分',
-    prof: '賴瑋婷',
-    test: 3,
-    homework: 6,
-    groupReport: true,
-    rollCall: 0,
-    hwLength: 1.5,
-    teacher: 15,
-    mental: 20,
-    effectiveness: 20,
-    usefulness: 35,
-    finalScore: 86
-  },
-  {
-    id: '0002',
-    course: '個體經濟學',
-    prof: '陳鎮洲',
-    test: 4,
-    homework: 2,
-    groupReport: false,
-    rollCall: 3
-  },
-  {
-    course: '經濟學',
-    prof: '王信實',
-    test: 6,
-    homework: 2,
-    groupReport: true,
-    rollCall: 1
-  },
-  {
-    course: '財政學',
-    prof: '陳國良',
-    test: 2,
-    homework: 6,
-    groupReport: true,
-    rollCall: 2
-  },
-  {
-    course: '商事法',
-    prof: '方佳霖',
-    test: 2,
-    homework: 1,
-    groupReport: false,
-    rollCall: 10
-  },
-  {
-    course: '英語口語訓練',
-    prof: '林琬瑜',
-    test: 5,
-    homework: 2,
-    groupReport: true,
-    rollCall: 0
-  },
-  {
-    course: '中級日語',
-    prof: '許清捐',
-    test: 3,
-    homework: 6,
-    groupReport: false,
-    rollCall: 2
-  },
-  {
-    course: '國文',
-    prof: '張慧貞',
-    test: 3,
-    homework: 2,
-    groupReport: false,
-    rollCall: 4
-  },
-  {
-    course: '美國運動史',
-    prof: '周一騰',
-    test: 5,
-    homework: 6,
-    groupReport: false,
-    rollCall: 1
-  },
-  {
-    course: '統計學',
-    prof: '郭濬智',
-    test: 4,
-    homework: 2,
-    groupReport: true,
-    rollCall: 8
-  },
-  {
-    course: '財務管理',
-    prof: '屠沒雅',
-    test: 3,
-    homework: 3,
-    groupReport: true,
-    rollCall: 3
-  },
-  {
-    course: '近代物理學',
-    prof: '琳於境',
-    test: 1,
-    homework: 10,
-    groupReport: false,
-    rollCall: 2
-  },
-  {
-    course: '法文',
-    prof: '古拉爵',
-    test: 5,
-    homework: 8,
-    groupReport: true,
-    rollCall: 3
-  },
-  {
-    course: '西班牙文',
-    prof: 'Jose',
-    test: 1,
-    homework: 6,
-    groupReport: false,
-    rollCall: 4
-  },
-  {
-    course: '初級瑜伽',
-    prof: '楊麗環',
-    test: 3,
-    homework: 6,
-    groupReport: true,
-    rollCall: 0
-  }
-];
+// const courses = [
+//   {
+//     courseId: '0001',
+//     course: '微積分',
+//     prof: '賴瑋婷',
+//     test: 3,
+//     homework: 6,
+//     groupReport: true,
+//     rollCall: 0,
+//     hwLength: 1.5,
+//     teacher: 15,
+//     mental: 20,
+//     effectiveness: 20,
+//     usefulness: 35,
+//     finalScore: 86
+//   },
+//   {
+//     id: '0002',
+//     course: '個體經濟學',
+//     prof: '陳鎮洲',
+//     test: 4,
+//     homework: 2,
+//     groupReport: false,
+//     rollCall: 3
+//   },
+//   {
+//     course: '經濟學',
+//     prof: '王信實',
+//     test: 6,
+//     homework: 2,
+//     groupReport: true,
+//     rollCall: 1
+//   },
+//   {
+//     course: '財政學',
+//     prof: '陳國良',
+//     test: 2,
+//     homework: 6,
+//     groupReport: true,
+//     rollCall: 2
+//   },
+//   {
+//     course: '商事法',
+//     prof: '方佳霖',
+//     test: 2,
+//     homework: 1,
+//     groupReport: false,
+//     rollCall: 10
+//   },
+//   {
+//     course: '英語口語訓練',
+//     prof: '林琬瑜',
+//     test: 5,
+//     homework: 2,
+//     groupReport: true,
+//     rollCall: 0
+//   },
+//   {
+//     course: '中級日語',
+//     prof: '許清捐',
+//     test: 3,
+//     homework: 6,
+//     groupReport: false,
+//     rollCall: 2
+//   },
+//   {
+//     course: '國文',
+//     prof: '張慧貞',
+//     test: 3,
+//     homework: 2,
+//     groupReport: false,
+//     rollCall: 4
+//   },
+//   {
+//     course: '美國運動史',
+//     prof: '周一騰',
+//     test: 5,
+//     homework: 6,
+//     groupReport: false,
+//     rollCall: 1
+//   },
+//   {
+//     course: '統計學',
+//     prof: '郭濬智',
+//     test: 4,
+//     homework: 2,
+//     groupReport: true,
+//     rollCall: 8
+//   },
+//   {
+//     course: '財務管理',
+//     prof: '屠沒雅',
+//     test: 3,
+//     homework: 3,
+//     groupReport: true,
+//     rollCall: 3
+//   },
+//   {
+//     course: '近代物理學',
+//     prof: '琳於境',
+//     test: 1,
+//     homework: 10,
+//     groupReport: false,
+//     rollCall: 2
+//   },
+//   {
+//     course: '法文',
+//     prof: '古拉爵',
+//     test: 5,
+//     homework: 8,
+//     groupReport: true,
+//     rollCall: 3
+//   },
+//   {
+//     course: '西班牙文',
+//     prof: 'Jose',
+//     test: 1,
+//     homework: 6,
+//     groupReport: false,
+//     rollCall: 4
+//   },
+//   {
+//     course: '初級瑜伽',
+//     prof: '楊麗環',
+//     test: 3,
+//     homework: 6,
+//     groupReport: true,
+//     rollCall: 0
+//   }
+// ];
 
 class CourseCards extends Component {
   state = {
@@ -154,10 +156,63 @@ class CourseCards extends Component {
     sortBy: ''
   };
 
+  async componentDidMount() {
+    const result = await axios.post('http://localhost:9999/getClassIndex', {
+      index: 0
+    });
+
+    const chainLength = parseInt(result.data[0]);
+    const contextLength = parseInt(this.props.context.courses.length);
+
+    if (chainLength === contextLength) {
+      return;
+    }
+
+    // result.data[0] is the length of courses
+    for (let i = 0; i < chainLength; i++) {
+      let courseObj = {};
+      const idData = await axios.post('http://localhost:9999/getClassIndex', {
+        index: i
+      });
+      const classId = idData.data[1];
+      const courseInfoPart1 = await axios.post(
+        'http://localhost:9999/getDataFromClassId',
+        {
+          classId
+        }
+      );
+      const courseInfoPart2 = await axios.post(
+        'http://localhost:9999/getDataFromClassIdPart2',
+        {
+          classId
+        }
+      );
+      courseObj = {
+        courseId: classId,
+        course: courseInfoPart1.data[0],
+        prof: courseInfoPart1.data[1],
+        homework: courseInfoPart1.data[2],
+        hwLength: courseInfoPart1.data[3],
+        test: courseInfoPart1.data[4],
+        testPrep: courseInfoPart1.data[5],
+        groupProject: courseInfoPart1.data[6],
+        rollCall: courseInfoPart1.data[7],
+        finalScore: courseInfoPart1.data[8],
+        teacher: courseInfoPart2.data[0],
+        usefulness: courseInfoPart2.data[1],
+        effectiveness: courseInfoPart2.data[2],
+        mental: courseInfoPart2.data[3],
+        count: courseInfoPart2.data[4]
+      };
+
+      this.props.context.updateCourses(courseObj);
+    }
+  }
+
   applyFilter = (keyword, sortBy) => {
     keyword.toLowerCase();
 
-    let filtered = courses.filter(
+    let filtered = this.props.context.courses.filter(
       ({ course, prof }) => course.includes(keyword) || prof.includes(keyword)
     );
 
@@ -230,4 +285,10 @@ class CourseCards extends Component {
   }
 }
 
-export default CourseCards;
+const MapCourseCards = props => (
+  <CourseDetailsConsumer>
+    {context => <CourseCards context={context} {...props} />}
+  </CourseDetailsConsumer>
+);
+
+export default MapCourseCards;

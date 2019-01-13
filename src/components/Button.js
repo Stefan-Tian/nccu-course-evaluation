@@ -14,6 +14,7 @@ export default styled.button`
   border: 0;
   align-self: center;
   cursor: pointer;
+  margin-bottom: ${({ mb }) => mb};
 
   &:hover {
     background-color: var(--color-teal);

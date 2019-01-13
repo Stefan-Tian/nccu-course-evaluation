@@ -1,11 +1,17 @@
 import React, { Component } from 'react';
 import styled, { css } from 'styled-components';
+import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { XYPlot, VerticalBarSeries, XAxis, YAxis } from 'react-vis';
 import Text from './Text';
 import Icons from '../img/symbols.svg';
 import { SvgSmall } from './Icon';
 import CommentSection from './CommentSection';
+import Aux from './Aux';
+import PasswordConfirmation from './PasswordConfirmation';
+import { ModalBack, CloseModal } from './Modal';
+import { AccountInfoConsumer } from './AccoutInfo.context';
+import { CourseDetailsConsumer } from './CourseDetails.context';
 
 const details = {
   courseId: '0001',
@@ -57,36 +63,6 @@ const Flex = styled.div`
   align-items: center;
   max-width: 70rem;
 `;
-
-const data = [
-  {
-    x: '教師評價',
-    y: details.teacher
-  },
-  {
-    x: '教學效率',
-    y: details.effectiveness
-  },
-  {
-    x: '教學成效',
-    y: details.usefulness
-  },
-  {
-    x: '學生感受',
-    y: details.mental
-  }
-];
-
-const timeData = [
-  {
-    y: details.hwLength,
-    x: '寫作業時間/次'
-  },
-  {
-    y: details.testPrep,
-    x: '考試準備時間/次'
-  }
-];
 
 const Container = styled.div`
   max-width: 99.2rem;
@@ -153,6 +129,23 @@ const InnerCircle = styled.div`
   padding-left: 1.5rem;
 `;
 
+const BlankContainer = styled.div`
+  background-color: #e8e8e8;
+  min-width: 24rem;
+  max-width: 24rem;
+  min-height: 24rem;
+  max-height: 24rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const Blank = styled.div`
+  font-size: 2.8rem;
+  color: #787878;
+  font-weight: bold;
+`;
+
 const Row = styled.div`
   display: flex;
   align-items: center;
@@ -172,152 +165,335 @@ const Row = styled.div`
     `}
 `;
 
-const totalScore = Math.floor(
-  ((details.teacher +
-    details.mental +
-    details.effectiveness +
-    details.usefulness) /
-    80) *
-    100
-);
-
 class CourseDetails extends Component {
+  async componentDidMount() {
+    const classId = this.props.match.params.id;
+    const courseInfoPart1 = await axios.post(
+      'http://localhost:9999/getDataFromClassId',
+      {
+        classId
+      }
+    );
+    const courseInfoPart2 = await axios.post(
+      'http://localhost:9999/getDataFromClassIdPart2',
+      {
+        classId
+      }
+    );
+    const courseObj = {
+      courseId: classId,
+      course: courseInfoPart1.data[0],
+      prof: courseInfoPart1.data[1],
+      homework: courseInfoPart1.data[2],
+      hwLength: courseInfoPart1.data[3],
+      test: courseInfoPart1.data[4],
+      testPrep: courseInfoPart1.data[5],
+      groupProject: courseInfoPart1.data[6],
+      rollCall: courseInfoPart1.data[7],
+      finalScore: courseInfoPart1.data[8],
+      teacher: courseInfoPart2.data[0],
+      usefulness: courseInfoPart2.data[1],
+      effectiveness: courseInfoPart2.data[2],
+      mental: courseInfoPart2.data[3],
+      count: courseInfoPart2.data[4]
+    };
+
+    this.setState({ course: courseObj });
+  }
+
+  state = {
+    password: '',
+    enterPassword: false,
+    comment: '',
+    response: '',
+    submitInfo: '',
+    course: {}
+  };
+
+  handleSubmitComment = async (account, password, comment) => {
+    const result = await axios.post(
+      'http://localhost:9999/addNameClassComment',
+      {
+        account,
+        password,
+        comment
+      }
+    );
+    console.log(result);
+  };
+
+  handleSubmitVote = async (account, password, response) => {
+    const result = await axios.post('http://localhost:9999//addVoteToComment', {
+      account,
+      password,
+      response
+    });
+
+    console.log(result);
+  };
+
+  onPasswordChange = e => this.setState({ password: e.target.value });
+  onEnterPassword = () => this.setState({ enterPassword: true });
+
+  onPasswordConfirm = () => {
+    const { currentAccount } = this.props.accountContext;
+    if (this.state.submitInfo === 'comment') {
+      const { password, comment } = this.state;
+      this.handleSubmitComment(currentAccount, password, comment);
+    } else if (this.state.submitInfo === 'vote') {
+      const { password, response } = this.state;
+      this.handleSubmitVote(currentAccount, password, response);
+    }
+    this.setState({ enterPassword: false });
+  };
+
+  onCommentChange = e => this.setState({ comment: e.target.value });
+
+  onSubmitComment = () => {
+    this.setState({ submitInfo: 'comment', enterPassword: true });
+  };
+
+  onUpvote = () => {
+    this.setState({ submitInfo: 'vote', response: 1, enterPassword: true });
+  };
+
+  onDownvote = () => {
+    this.setState({ submitInfo: 'vote', response: -1, enterPassword: true });
+  };
+
   render() {
-    return (
-      <Container>
-        <Row end mb="2.4rem" center>
-          <Text lg mr="1.1rem">
-            {details.course}
-          </Text>
-          <Text md gray mr="30px">
-            {details.prof}
-          </Text>
-          <PureLink
-            to={`/questionnaire/${details.courseId}-${details.course}-${
-              details.prof
-            }`}
-          >
-            填寫課程問卷
-          </PureLink>
-        </Row>
-        <ContentContainer>
-          <div>
-            <Flex>
-              <Block>
-                <Row>
-                  <SvgSmall h="2.3rem" w="2.3rem">
-                    <use xlinkHref={`${Icons}#icon-document-edit`} />
-                  </SvgSmall>
-                  <Text md gray>
-                    考試 <Count>{details.test}</Count> 次
-                  </Text>
-                </Row>
-                <Row>
-                  <SvgSmall h="2.3rem" w="2rem">
-                    <use xlinkHref={`${Icons}#icon-files`} />
-                  </SvgSmall>
-                  <Text md gray ml="0.35rem">
-                    作業 <Count>{details.homework}</Count> 次
-                  </Text>
-                </Row>
-                <Row>
-                  <SvgSmall h="2.3rem" w="2rem">
-                    <use xlinkHref={`${Icons}#icon-presentation`} />
-                  </SvgSmall>
-                  <Text md gray ml="0.35rem">
-                    <Count normal>{details.groupReport ? '有' : '無'}</Count>
-                    團體報告
-                  </Text>
-                </Row>
-                <Row>
-                  <SvgSmall h="2.3rem" w="2rem">
-                    <use xlinkHref={`${Icons}#icon-hand-stop`} />
-                  </SvgSmall>
-                  <Text md gray ml="0.35rem">
-                    點名 <Count>{details.rollCall}</Count> 次
-                  </Text>
-                </Row>
-              </Block>
-              <Block>
-                <XYPlot width={250} height={250} xType="ordinal">
-                  <VerticalBarSeries
-                    data={timeData}
-                    color="#3cd3d3"
-                    barWidth="0.6"
-                  />
-                  <XAxis
-                    style={{
-                      text: {
-                        stroke: 'none',
-                        fill: '#535252',
-                        fontWeight: 500,
-                        fontSize: '12px'
-                      },
-                      line: { stroke: 'none' }
-                    }}
-                  />
-                  <YAxis
-                    style={{
-                      text: {
-                        stroke: 'none',
-                        fill: '#535252',
-                        fontWeight: 500,
-                        fontSize: '12px'
-                      },
-                      line: { stroke: 'none' }
-                    }}
-                  />
-                </XYPlot>
-              </Block>
-            </Flex>
-            <Flex>
-              <Block>
-                <XYPlot width={250} height={250} xType="ordinal">
-                  <VerticalBarSeries data={data} color="#3cd3d3" />
-                  <XAxis
-                    style={{
-                      text: {
-                        stroke: 'none',
-                        fill: '#535252',
-                        fontWeight: 500,
-                        fontSize: '12px'
-                      },
-                      line: { stroke: 'none' }
-                    }}
-                  />
-                  <YAxis
-                    style={{
-                      text: {
-                        stroke: 'none',
-                        fill: '#535252',
-                        fontWeight: 500,
-                        fontSize: '12px'
-                      },
-                      line: { stroke: 'none' }
-                    }}
-                  />
-                </XYPlot>
-              </Block>
-              <Block>
-                <Total>
-                  <h1>總分</h1>
-                  <Circle percent={totalScore}>
-                    <InnerCircle>
-                      {totalScore}
-                      <span style={{ fontSize: '35px', marginBottom: '-3rem' }}>
-                        %
-                      </span>
-                    </InnerCircle>
-                  </Circle>
-                </Total>
-              </Block>
-            </Flex>
-          </div>
-          <CommentSection />
-        </ContentContainer>
-      </Container>
+    const {
+      course,
+      prof,
+      test,
+      homework,
+      courseId,
+      groupReport,
+      rollCall,
+      teacher,
+      usefulness,
+      effectiveness,
+      mental,
+      testPrep,
+      hwLength
+    } = this.state.course;
+    const data = [
+      {
+        x: '教師評價',
+        y: teacher
+      },
+      {
+        x: '教學效率',
+        y: effectiveness
+      },
+      {
+        x: '教學成效',
+        y: usefulness
+      },
+      {
+        x: '學生感受',
+        y: mental
+      }
+    ];
+
+    const timeData = [
+      {
+        y: hwLength,
+        x: '寫作業時間/次'
+      },
+      {
+        y: testPrep,
+        x: '考試準備時間/次'
+      }
+    ];
+
+    const totalScore = Math.floor(
+      ((teacher + mental + effectiveness + usefulness) / 80) * 100
+    );
+
+    return teacher ? (
+      <Aux>
+        <Container>
+          <Row end mb="2.4rem" center>
+            <Text lg mr="1.1rem">
+              {course}
+            </Text>
+            <Text md gray mr="30px">
+              {prof}
+            </Text>
+            <PureLink to={`/questionnaire/${courseId}-${course}-${prof}`}>
+              填寫課程問卷
+            </PureLink>
+          </Row>
+          <ContentContainer>
+            <div>
+              <Flex>
+                <Block>
+                  <Row>
+                    <SvgSmall h="2.3rem" w="2.3rem">
+                      <use xlinkHref={`${Icons}#icon-document-edit`} />
+                    </SvgSmall>
+                    <Text md gray>
+                      考試 <Count>{test}</Count> 次
+                    </Text>
+                  </Row>
+                  <Row>
+                    <SvgSmall h="2.3rem" w="2rem">
+                      <use xlinkHref={`${Icons}#icon-files`} />
+                    </SvgSmall>
+                    <Text md gray ml="0.35rem">
+                      作業 <Count>{homework}</Count> 次
+                    </Text>
+                  </Row>
+                  <Row>
+                    <SvgSmall h="2.3rem" w="2rem">
+                      <use xlinkHref={`${Icons}#icon-presentation`} />
+                    </SvgSmall>
+                    <Text md gray ml="0.35rem">
+                      <Count normal>{groupReport ? '有' : '無'}</Count>
+                      團體報告
+                    </Text>
+                  </Row>
+                  <Row>
+                    <SvgSmall h="2.3rem" w="2rem">
+                      <use xlinkHref={`${Icons}#icon-hand-stop`} />
+                    </SvgSmall>
+                    <Text md gray ml="0.35rem">
+                      點名 <Count>{rollCall}</Count> 次
+                    </Text>
+                  </Row>
+                </Block>
+                <Block>
+                  {totalScore === 0 ? (
+                    <BlankContainer>
+                      <Blank>尚無回覆</Blank>
+                    </BlankContainer>
+                  ) : (
+                    <XYPlot width={250} height={250} xType="ordinal">
+                      <VerticalBarSeries
+                        data={timeData}
+                        color="#3cd3d3"
+                        barWidth="0.6"
+                      />
+                      <XAxis
+                        style={{
+                          text: {
+                            stroke: 'none',
+                            fill: '#535252',
+                            fontWeight: 500,
+                            fontSize: '12px'
+                          },
+                          line: { stroke: 'none' }
+                        }}
+                      />
+                      <YAxis
+                        style={{
+                          text: {
+                            stroke: 'none',
+                            fill: '#535252',
+                            fontWeight: 500,
+                            fontSize: '12px'
+                          },
+                          line: { stroke: 'none' }
+                        }}
+                      />
+                    </XYPlot>
+                  )}
+                </Block>
+              </Flex>
+              <Flex>
+                <Block>
+                  {totalScore === 0 ? (
+                    <BlankContainer>
+                      <Blank>尚無回覆</Blank>
+                    </BlankContainer>
+                  ) : (
+                    <XYPlot width={250} height={250} xType="ordinal">
+                      <VerticalBarSeries data={data} color="#3cd3d3" />
+                      <XAxis
+                        style={{
+                          text: {
+                            stroke: 'none',
+                            fill: '#535252',
+                            fontWeight: 500,
+                            fontSize: '12px'
+                          },
+                          line: { stroke: 'none' }
+                        }}
+                      />
+                      <YAxis
+                        style={{
+                          text: {
+                            stroke: 'none',
+                            fill: '#535252',
+                            fontWeight: 500,
+                            fontSize: '12px'
+                          },
+                          line: { stroke: 'none' }
+                        }}
+                      />
+                    </XYPlot>
+                  )}
+                </Block>
+                <Block>
+                  <Total>
+                    <h1>總分</h1>
+                    <Circle percent={totalScore}>
+                      <InnerCircle>
+                        {totalScore}
+                        <span
+                          style={{ fontSize: '35px', marginBottom: '-3rem' }}
+                        >
+                          %
+                        </span>
+                      </InnerCircle>
+                    </Circle>
+                  </Total>
+                </Block>
+              </Flex>
+            </div>
+            <CommentSection
+              comment={this.state.comment}
+              onCommentChange={this.onCommentChange}
+              onSubmitComment={this.onSubmitComment}
+              onUpvote={this.onUpvote}
+              onDownvote={this.onDownvote}
+            />
+          </ContentContainer>
+        </Container>
+        {this.state.enterPassword ? (
+          <ModalBack>
+            <CloseModal onClick={() => this.setState({ enterPassword: false })}>
+              x
+            </CloseModal>
+            <PasswordConfirmation
+              password={this.state.password}
+              onPasswordChange={this.onPasswordChange}
+              onPasswordConfirm={this.onPasswordConfirm}
+            />
+          </ModalBack>
+        ) : null}
+      </Aux>
+    ) : (
+      <div>Wait...</div>
     );
   }
 }
 
-export default CourseDetails;
+const MapCourseDetails = props => (
+  <AccountInfoConsumer>
+    {accountContext => (
+      <CourseDetailsConsumer>
+        {courseContext => (
+          <CourseDetails
+            accountContext={accountContext}
+            courseContext={courseContext}
+            {...props}
+          />
+        )}
+      </CourseDetailsConsumer>
+    )}
+  </AccountInfoConsumer>
+);
+
+export default MapCourseDetails;

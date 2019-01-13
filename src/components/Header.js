@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import styled, { css } from 'styled-components';
 import Text from './Text';
 import Aux from './Aux';
-import Login from './Login';
 import Background from '../img/final-back.png';
+import { AccountInfoConsumer } from './AccoutInfo.context';
 
 const Hero = styled.div`
   margin-top: -10rem;
@@ -91,6 +91,35 @@ const SubTitle = styled.span`
   margin-bottom: 2.4px;
 `;
 
+const RightHead = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const HeadButton = styled.button`
+  background-color: var(--color-teal-light);
+  color: #fff;
+  border: 2px solid var(--color-teal-light);
+  border-radius: 4px;
+  padding: 1rem 2.4rem;
+  margin-right: 5.6rem;
+  font-size: 1.6rem;
+  font-weight: bold;
+  box-shadow: var(--shadow);
+
+  &:hover {
+    background-color: #fff;
+    border-color: var(--color-teal);
+    color: var(--color-teal);
+  }
+
+  ${({ detached }) =>
+    detached &&
+    css`
+      box-shadow: none;
+    `}
+`;
+
 export class Head extends Component {
   state = {
     openLogin: false
@@ -102,19 +131,31 @@ export class Head extends Component {
 
   render() {
     return (
-      <Aux>
-        <StyledHead detached={this.props.detached}>
-          <Text md clickable>
-            <PureLink to="/">選課天眼通</PureLink>
-          </Text>
-          <Text sm clickable>
-            {/* 登入 */}
-            <PureUrl href="https://0689f14c.ngrok.io/login?next=%2F%3Ffbclid%3DIwAR1GU3WszWj1XfdtW-wb6Xe6og--S_drGqiKkOovOHO0RVFt6jeXwGaX8H4">
-              登入
-            </PureUrl>
-          </Text>
-        </StyledHead>
-      </Aux>
+      <AccountInfoConsumer>
+        {({ currentAccount, clearCurrentAccount }) => (
+          <Aux>
+            <StyledHead detached={this.props.detached}>
+              <Text md clickable>
+                <PureLink to="/">選課天眼通</PureLink>
+              </Text>
+              <RightHead>
+                <HeadButton mr="5.6rem" detached={this.props.detached}>
+                  <PureLink to="/create-course">新增課程</PureLink>
+                </HeadButton>
+                {currentAccount ? (
+                  <Text sm clickable onClick={clearCurrentAccount}>
+                    登出
+                  </Text>
+                ) : (
+                  <Text sm clickable>
+                    <PureLink to="/login">登入</PureLink>
+                  </Text>
+                )}
+              </RightHead>
+            </StyledHead>
+          </Aux>
+        )}
+      </AccountInfoConsumer>
     );
   }
 }
