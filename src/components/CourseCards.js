@@ -164,11 +164,12 @@ class CourseCards extends Component {
     const chainLength = parseInt(result.data[0]);
     const contextLength = parseInt(this.props.context.courses.length);
 
-    if (chainLength === contextLength) {
+    if (chainLength <= contextLength) {
       return;
     }
 
     // result.data[0] is the length of courses
+    this.props.context.cleanCourses();
     for (let i = 0; i < chainLength; i++) {
       let courseObj = {};
       const idData = await axios.post('http://localhost:9999/getClassIndex', {
@@ -187,22 +188,43 @@ class CourseCards extends Component {
           classId
         }
       );
+
+      const count = parseInt(courseInfoPart2.data[4]);
+      const homework =
+        Math.round((parseInt(courseInfoPart1.data[2]) / count) * 2.5) || 0;
+      const hwLength =
+        Math.round((parseInt(courseInfoPart1.data[3]) / count) * 2.5) || 0;
+      const test =
+        Math.round((parseInt(courseInfoPart1.data[4]) / count) * 2.5) || 0;
+      const testPrep =
+        Math.round((parseInt(courseInfoPart1.data[5]) / count) * 2.5) || 0;
+      const groupProject =
+        Math.round((parseInt(courseInfoPart1.data[6]) / count) * 2.5) || 0;
+      const rollCall =
+        Math.round((parseInt(courseInfoPart1.data[7]) / count) * 2.5) || 0;
+      const finalScore =
+        Math.round((parseInt(courseInfoPart1.data[8]) / count) * 2.5) || 0;
+      const teacher = parseInt(courseInfoPart2.data[0]) / count || 0;
+      const usefulness = parseInt(courseInfoPart2.data[1]) / count || 0;
+      const effectiveness = parseInt(courseInfoPart2.data[2]) / count || 0;
+      const mental = parseInt(courseInfoPart2.data[3]) / count || 0;
+
       courseObj = {
         courseId: classId,
         course: courseInfoPart1.data[0],
         prof: courseInfoPart1.data[1],
-        homework: courseInfoPart1.data[2],
-        hwLength: courseInfoPart1.data[3],
-        test: courseInfoPart1.data[4],
-        testPrep: courseInfoPart1.data[5],
-        groupProject: courseInfoPart1.data[6],
-        rollCall: courseInfoPart1.data[7],
-        finalScore: courseInfoPart1.data[8],
-        teacher: courseInfoPart2.data[0],
-        usefulness: courseInfoPart2.data[1],
-        effectiveness: courseInfoPart2.data[2],
-        mental: courseInfoPart2.data[3],
-        count: courseInfoPart2.data[4]
+        homework,
+        hwLength,
+        test,
+        testPrep,
+        groupProject,
+        rollCall,
+        usefulness,
+        teacher,
+        effectiveness,
+        mental,
+        finalScore,
+        count
       };
 
       this.props.context.updateCourses(courseObj);
@@ -234,7 +256,7 @@ class CourseCards extends Component {
   switchSortBy = item => this.setState({ sortBy: item });
 
   render() {
-    return (
+    return this.props.context.courses ? (
       <Aux>
         <Header />
         <FilterBar
@@ -281,6 +303,8 @@ class CourseCards extends Component {
           </Flex>
         </Container>
       </Aux>
+    ) : (
+      <div>Wait..</div>
     );
   }
 }

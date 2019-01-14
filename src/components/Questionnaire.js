@@ -72,13 +72,13 @@ class Questionnaire extends Component {
   state = {
     password: '',
     enterPassword: '',
-    homework: '',
-    hwLength: '',
-    test: '',
-    testPrep: '',
-    groupProject: false,
-    rollCall: '',
-    finalScore: '',
+    homework: 1,
+    hwLength: 1,
+    test: 1,
+    testPrep: 1,
+    groupProject: 0,
+    rollCall: 1,
+    finalScore: 1,
     question1: '',
     question2: '',
     question3: '',
@@ -166,6 +166,14 @@ class Questionnaire extends Component {
       question16
     } = this.state;
 
+    homework = parseInt(homework);
+    hwLength = parseInt(hwLength);
+    test = parseInt(test);
+    testPrep = parseInt(testPrep);
+    groupProject = parseInt(groupProject);
+    rollCall = parseInt(rollCall);
+    finalScore = parseInt(finalScore);
+
     const [id, className, teacherName] = this.props.match.params.id.split('-');
     homework = parseInt(homework);
     hwLength = parseInt(hwLength);
@@ -211,9 +219,7 @@ class Questionnaire extends Component {
     const result = await axios.post('http://localhost:9999/addNameClassValue', {
       account,
       password,
-      id,
-      className,
-      teacherName,
+      classId: id,
       homework,
       hwLength,
       test,
@@ -227,7 +233,7 @@ class Questionnaire extends Component {
       mental
     });
 
-    console(result);
+    console.log(result);
   };
 
   onPasswordConfirm = () => {
@@ -235,6 +241,7 @@ class Questionnaire extends Component {
     const { password } = this.state;
     this.handleSubmit(currentAccount, password);
     this.setState({ enterPassword: false });
+    this.props.history.push('/');
   };
 
   render() {
@@ -275,12 +282,12 @@ class Questionnaire extends Component {
               </div> */}
                 <SelectContainer>
                   <Select onChange={this.onHomeworkChange}>
-                    <option value="1">0-3</option>
-                    <option value="2">4-6</option>
-                    <option value="3">7-9</option>
-                    <option value="4">10-12</option>
-                    <option value="5">13-15</option>
-                    <option value="5">多於15</option>
+                    <option value={1}>0-3</option>
+                    <option value={2}>4-6</option>
+                    <option value={3}>7-9</option>
+                    <option value={4}>10-12</option>
+                    <option value={5}>13-15</option>
+                    <option value={6}>多於15</option>
                   </Select>
                   次
                 </SelectContainer>
@@ -289,12 +296,12 @@ class Questionnaire extends Component {
                 <LeftList>2. 請問您平均每份作業完成時間</LeftList>
                 <SelectContainer>
                   <Select onChange={this.onHwLengthChange}>
-                    <option value="1">0-3</option>
-                    <option value="2">4-6</option>
-                    <option value="3">7-9</option>
-                    <option value="4">10-12</option>
-                    <option value="5">13-15</option>
-                    <option value="5">多於15</option>
+                    <option value={1}>0-3</option>
+                    <option value={2}>4-6</option>
+                    <option value={3}>7-9</option>
+                    <option value={4}>10-12</option>
+                    <option value={5}>13-15</option>
+                    <option value={6}>多於15</option>
                   </Select>
                   小時
                 </SelectContainer>
@@ -303,12 +310,12 @@ class Questionnaire extends Component {
                 <LeftList>3. 請問此課程包含小考共有幾次考試</LeftList>
                 <SelectContainer>
                   <Select onChange={this.onTestChange}>
-                    <option value="1">0-3</option>
-                    <option value="2">4-6</option>
-                    <option value="3">7-9</option>
-                    <option value="4">10-12</option>
-                    <option value="5">13-15</option>
-                    <option value="5">多於15</option>
+                    <option value={1}>0-3</option>
+                    <option value={2}>4-6</option>
+                    <option value={3}>7-9</option>
+                    <option value={4}>10-12</option>
+                    <option value={5}>13-15</option>
+                    <option value={6}>多於15</option>
                   </Select>
                   次
                 </SelectContainer>
@@ -317,12 +324,12 @@ class Questionnaire extends Component {
                 <LeftList>4. 請問您平均每次考試準備時間</LeftList>
                 <SelectContainer>
                   <Select onChange={this.onTestPrepChange}>
-                    <option value="1">0-3</option>
-                    <option value="2">4-6</option>
-                    <option value="3">7-9</option>
-                    <option value="4">10-12</option>
-                    <option value="5">13-15</option>
-                    <option value="5">多於15</option>
+                    <option value={1}>0-3</option>
+                    <option value={2}>4-6</option>
+                    <option value={3}>7-9</option>
+                    <option value={4}>10-12</option>
+                    <option value={5}>13-15</option>
+                    <option value={6}>多於15</option>
                   </Select>
                   小時
                 </SelectContainer>
@@ -344,7 +351,7 @@ class Questionnaire extends Component {
                       name="groupProject"
                       value={false}
                       type="radio"
-                      onChange={() => this.setState({ groupProject: -1 })}
+                      onChange={() => this.setState({ groupProject: 0 })}
                     />{' '}
                     無
                   </label>
@@ -354,12 +361,12 @@ class Questionnaire extends Component {
                 <LeftList>6. 請問此課程一學期點名幾次</LeftList>
                 <SelectContainer>
                   <Select onChange={this.onRollCallChange}>
-                    <option value="1">0-3</option>
-                    <option value="2">4-6</option>
-                    <option value="3">7-9</option>
-                    <option value="4">10-12</option>
-                    <option value="5">13-15</option>
-                    <option value="5">多於15</option>
+                    <option value={1}>0-3</option>
+                    <option value={2}>4-6</option>
+                    <option value={3}>7-9</option>
+                    <option value={4}>10-12</option>
+                    <option value={5}>13-15</option>
+                    <option value={6}>多於15</option>
                   </Select>
                   次
                 </SelectContainer>
@@ -368,11 +375,11 @@ class Questionnaire extends Component {
                 <LeftList>7. 請問您本課程期末總成績</LeftList>
                 <SelectContainer>
                   <Select onChange={this.onFinalScoreChange}>
-                    <option value="1">低於60</option>
-                    <option value="2">60-69</option>
-                    <option value="3">70-79</option>
-                    <option value="4">80-89</option>
-                    <option value="5">90-99</option>
+                    <option value={1}>低於60</option>
+                    <option value={2}>60-69</option>
+                    <option value={3}>70-79</option>
+                    <option value={4}>80-89</option>
+                    <option value={5}>90-99</option>
                   </Select>
                   分
                 </SelectContainer>

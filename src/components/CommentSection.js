@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { Component } from 'react';
+import axios from 'axios';
 import styled, { css } from 'styled-components';
 import Text from './Text';
 
@@ -86,6 +87,17 @@ const VoteContainer = styled(Flex)`
   margin-bottom: 0.5rem;
 `;
 
+const VoteScore = styled.span`
+  display: inline-block;
+  font-size: 1.6rem;
+  font-weight: bold;
+  align-self: flex-end;
+  margin-bottom: -2px;
+  margin-left: 1.2rem;
+  color: #787878;
+  min-width: 1.5rem;
+`;
+
 const Review = styled.button`
   border: 1.5px solid var(--color-teal-light);
   border-radius: 4px;
@@ -101,46 +113,121 @@ const Review = styled.button`
   }
 `;
 
-const comments = [
-  '期中考寫到手酸',
-  '都不點名超讚',
-  '心很累心很累心很累心很累心很累心很累心很累心很累心很累心很累心很累心很累心很累心很累心很累心很累心很累心很累心很累心很累',
-  '微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分我討厭微積分'
-];
+class CommentSection extends Component {
+  state = {
+    comments: [],
+    update: false
+  };
 
-const CommentSection = ({
-  comment,
-  onCommentChange,
-  onUpvote,
-  onDownvote,
-  onSubmitComment
-}) => (
-  <CommentContainer>
-    <Flex>
-      <NewComment value={comment} onChange={onCommentChange} />
-      <Review onClick={onSubmitComment}>留言</Review>
-    </Flex>
-    <Comment>
-      <Text sm>期中考寫到手酸</Text>
-      <VoteContainer>
-        <Vote down onClick={onDownvote}>
-          噓
-        </Vote>
-        <Vote up onClick={onUpvote}>
-          讚
-        </Vote>
-      </VoteContainer>
-    </Comment>
-    {comments.map(comment => (
-      <Comment>
-        <Text sm>{comment}</Text>
-        <VoteContainer>
-          <Vote down>噓</Vote>
-          <Vote up>讚</Vote>
-        </VoteContainer>
-      </Comment>
-    ))}
-  </CommentContainer>
-);
+  getData = async () => {
+    const { classId } = this.props;
+    const result = await axios.post('http://localhost:9999/getVoteData', {
+      classId,
+      commentNum: 0
+    });
+    const commentLen = result.data[3];
+    if (commentLen === this.state.comments.length) {
+      return;
+    }
+    let updatedComments = [];
+    for (let i = 0; i < commentLen; i++) {
+      const result = await axios.post('http://localhost:9999/getVoteData', {
+        classId,
+        commentNum: i
+      });
+      const text = result.data[1];
+      const votes = result.data[2];
+      const commentData = {
+        commentId: i,
+        text,
+        votes
+      };
+      updatedComments.push(commentData);
+    }
+
+    this.setState({ comments: updatedComments });
+  };
+
+  async componentDidMount() {
+    const { classId } = this.props;
+    const result = await axios.post('http://localhost:9999/getVoteData', {
+      classId,
+      commentNum: 0
+    });
+    const commentLen = result.data[3];
+    if (commentLen === this.state.comments.length) {
+      return;
+    }
+    const updatedComments = [...this.state.comments];
+    for (let i = 0; i < commentLen; i++) {
+      const result = await axios.post('http://localhost:9999/getVoteData', {
+        classId,
+        commentNum: i
+      });
+      const text = result.data[1];
+      const votes = result.data[2];
+      const commentData = {
+        commentId: i,
+        text,
+        votes
+      };
+      updatedComments.push(commentData);
+    }
+
+    this.setState({ comments: updatedComments });
+  }
+
+  render() {
+    const {
+      comment,
+      onCommentChange,
+      onUpvote,
+      onDownvote,
+      onSubmitComment
+    } = this.props;
+    const { comments } = this.state;
+    return (
+      <CommentContainer>
+        <Flex>
+          <NewComment value={comment} onChange={onCommentChange} />
+          <Review
+            onClick={() => {
+              onSubmitComment();
+              setTimeout(() => this.getData(), 5000);
+            }}
+          >
+            留言
+          </Review>
+        </Flex>
+        {comments.map(comment => (
+          <Comment key={comment.text}>
+            <Text sm>{comment.text}</Text>
+            <VoteContainer>
+              <Vote
+                down
+                onClick={async () => {
+                  await onDownvote(comment.commentId);
+                  setTimeout(() => this.getData(), 5000);
+                }}
+              >
+                噓
+              </Vote>
+              <Vote
+                up
+                onClick={async () => {
+                  await onUpvote(comment.commentId);
+                  setTimeout(() => this.getData(), 5000);
+                }}
+              >
+                讚
+              </Vote>
+              <VoteScore>{comment.votes}</VoteScore>
+            </VoteContainer>
+          </Comment>
+        ))}
+      </CommentContainer>
+    );
+  }
+}
 
 export default CommentSection;

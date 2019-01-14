@@ -56,11 +56,11 @@ class CreateCourse extends Component {
     this.setState({ enterPassword: true });
   };
 
-  onPasswordConfirm = () => {
+  onPasswordConfirm = async () => {
     const { currentAccount } = this.props.context;
     const { courseId, courseName, courseInstructor, password } = this.state;
 
-    this.handleSubmit(
+    await this.handleSubmit(
       currentAccount,
       password,
       courseId,
@@ -68,7 +68,7 @@ class CreateCourse extends Component {
       courseInstructor
     );
     this.setState({ enterPassword: false });
-    this.props.history.push('/');
+    setTimeout(() => this.props.history.push('/'), 3000);
   };
 
   render() {

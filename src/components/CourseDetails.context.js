@@ -13,12 +13,15 @@ export class CourseDetailsProvider extends Component {
     this.setState({ courses: updatedCourses });
   };
 
+  cleanCourses = () => this.setState({ courses: [] });
+
   render() {
     return (
       <CourseDetails.Provider
         value={{
           courses: this.state.courses,
-          updateCourses: this.updateCourses
+          updateCourses: this.updateCourses,
+          cleanCourses: this.cleanCourses
         }}
       >
         {this.props.children}

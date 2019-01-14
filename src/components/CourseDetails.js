@@ -205,15 +205,18 @@ class CourseDetails extends Component {
     password: '',
     enterPassword: false,
     comment: '',
-    response: '',
+    vote: '',
     submitInfo: '',
-    course: {}
+    course: {},
+    commentNum: ''
   };
 
   handleSubmitComment = async (account, password, comment) => {
+    const classId = this.state.course.courseId;
     const result = await axios.post(
       'http://localhost:9999/addNameClassComment',
       {
+        classId,
         account,
         password,
         comment
@@ -222,11 +225,14 @@ class CourseDetails extends Component {
     console.log(result);
   };
 
-  handleSubmitVote = async (account, password, response) => {
-    const result = await axios.post('http://localhost:9999//addVoteToComment', {
+  handleSubmitVote = async (account, password, commentNum, vote) => {
+    const classId = this.state.course.courseId;
+    const result = await axios.post('http://localhost:9999/addVoteToComment', {
+      classId,
+      commentNum,
       account,
       password,
-      response
+      vote
     });
 
     console.log(result);
@@ -235,14 +241,15 @@ class CourseDetails extends Component {
   onPasswordChange = e => this.setState({ password: e.target.value });
   onEnterPassword = () => this.setState({ enterPassword: true });
 
-  onPasswordConfirm = () => {
+  onPasswordConfirm = async () => {
     const { currentAccount } = this.props.accountContext;
     if (this.state.submitInfo === 'comment') {
       const { password, comment } = this.state;
-      this.handleSubmitComment(currentAccount, password, comment);
+      await this.handleSubmitComment(currentAccount, password, comment);
     } else if (this.state.submitInfo === 'vote') {
-      const { password, response } = this.state;
-      this.handleSubmitVote(currentAccount, password, response);
+      let { password, vote, commentNum } = this.state;
+      vote = parseInt(vote);
+      await this.handleSubmitVote(currentAccount, password, commentNum, vote);
     }
     this.setState({ enterPassword: false });
   };
@@ -253,30 +260,66 @@ class CourseDetails extends Component {
     this.setState({ submitInfo: 'comment', enterPassword: true });
   };
 
-  onUpvote = () => {
-    this.setState({ submitInfo: 'vote', response: 1, enterPassword: true });
+  onUpvote = commentNum => {
+    this.setState({
+      submitInfo: 'vote',
+      vote: 1,
+      enterPassword: true,
+      commentNum
+    });
   };
 
-  onDownvote = () => {
-    this.setState({ submitInfo: 'vote', response: -1, enterPassword: true });
+  onDownvote = commentNum => {
+    this.setState({
+      submitInfo: 'vote',
+      vote: -1,
+      enterPassword: true,
+      commentNum
+    });
   };
 
   render() {
-    const {
+    let {
+      updateChild,
+      courseId,
       course,
       prof,
       test,
       homework,
-      courseId,
       groupReport,
       rollCall,
       teacher,
       usefulness,
       effectiveness,
       mental,
+      hwLength,
       testPrep,
-      hwLength
+      count
     } = this.state.course;
+
+    const totalScore =
+      Math.floor(
+        ((parseInt(teacher) +
+          parseInt(mental) +
+          parseInt(effectiveness) +
+          parseInt(usefulness)) /
+          80 /
+          parseInt(count)) *
+          100
+      ) || 0;
+
+    test = Math.round((parseInt(test) / parseInt(count)) * 2.5) || 0;
+    testPrep = Math.round((parseInt(testPrep) / parseInt(count)) * 2.5) || 0;
+    groupReport = Math.round(parseInt(groupReport) / parseInt(count));
+    rollCall = Math.round((parseInt(rollCall) / parseInt(count)) * 2.5) || 0;
+    homework = Math.round((parseInt(homework) / parseInt(count)) * 2.5) || 0;
+    hwLength = Math.round((parseInt(hwLength) / parseInt(count)) * 2.5) || 0;
+
+    teacher = parseInt(teacher) / parseInt(count) || 0;
+    mental = parseInt(mental) / parseInt(count) || 0;
+    effectiveness = parseInt(effectiveness) / parseInt(count) || 0;
+    usefulness = parseInt(usefulness) / parseInt(count) || 0;
+
     const data = [
       {
         x: '教師評價',
@@ -307,11 +350,7 @@ class CourseDetails extends Component {
       }
     ];
 
-    const totalScore = Math.floor(
-      ((teacher + mental + effectiveness + usefulness) / 80) * 100
-    );
-
-    return teacher ? (
+    return courseId ? (
       <Aux>
         <Container>
           <Row end mb="2.4rem" center>
@@ -458,6 +497,8 @@ class CourseDetails extends Component {
               onSubmitComment={this.onSubmitComment}
               onUpvote={this.onUpvote}
               onDownvote={this.onDownvote}
+              classId={courseId}
+              updateChild={updateChild}
             />
           </ContentContainer>
         </Container>
